@@ -376,6 +376,31 @@ void CCrowboxCore::RemoveEnqueuedCoin()
 }
 
 //----------------------------------------------------------
+// Used mainly for debugging or conveying information when
+// no serial connection is available. Don't ship any code
+// that calls this function- it's strictly intended for use
+// during development and debugging. 
+//
+// NOTE: This is a BLOCKING operation.
+//----------------------------------------------------------
+void CCrowboxCore::BlinkLED( int numTimes )
+{
+    for(  unsigned char i = 0 ; i < numTimes ; ++i )
+    {
+      // Turn the LED on for a moment
+      digitalWrite( OUTPUT_PIN_LED, HIGH );
+      delay( 500 );
+
+      // Now off for a moment
+      digitalWrite( OUTPUT_PIN_LED, LOW );
+      delay( 500 );
+    }
+
+    // Make sure the LED is off when we are done.
+    digitalWrite( OUTPUT_PIN_LED, LOW );
+}
+
+//----------------------------------------------------------
 // Helper function to attach the basket servo
 //
 // NOTE: This function is safe to call even if the servo is
@@ -387,6 +412,7 @@ void CCrowboxCore::AttachBasketServo()
   if( !m_basketServo.attached() )
   {
     m_basketServo.attach( OUTPUT_PIN_SERVO );
+    BlinkLED( 1 );    
   }
 }
 
@@ -405,6 +431,7 @@ void CCrowboxCore::DetachBasketServo()
   if( m_basketServo.attached() )
   {
     m_basketServo.detach();
+    BlinkLED( 2 );
   }
 }
 
@@ -428,7 +455,9 @@ void CCrowboxCore::OpenRewardBasket()
         // For now we just whip the door open!
         m_basketServo.write( SERVO_POS_OPEN );
         
-        // Give it time to finish. One second is more than enough
+        // Give it time to finish. One second is more than enough time but
+        // we need to ensure the servo finishes moving before detaching
+        // the servo so we pad the time a little bit.
         delay( 1000 ); 
         DetachBasketServo(); 
     }

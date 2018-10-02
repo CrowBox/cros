@@ -67,6 +67,7 @@ protected:
     //--------------------------------------
     // Native Methods
     //--------------------------------------
+    void BlinkLED( int numTimes );
     void AttachBasketServo();
     void DetachBasketServo();
     
