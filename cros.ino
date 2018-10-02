@@ -3,7 +3,7 @@
 //
 // The 'kernel' of the CrOS is called "The Core"
 // 
-// Version 0.99a - First Release: August 2, 2018
+// Version 0.99c - October 2018
 //
 // http://www.thecrowbox.com
 //==========================================================

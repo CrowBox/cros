@@ -3,7 +3,7 @@
 //
 // Home to common datatypes used throughout the system
 //
-// Version 0.99a - First Release: August 2, 2018
+// Version 0.99c - October 2018
 //
 // http://www.thecrowbox.com
 //==========================================================
@@ -14,6 +14,7 @@
 #ifndef CROS_TYPES_H
 #define CROS_TYPES_H
 
+//--------------------------------------
 // Time stored in a float, formatted as 
 // seconds.fractions of second
 //

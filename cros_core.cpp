@@ -2,7 +2,7 @@
 //
 // The 'kernal' of the CrOS is called "The Core"
 //
-// Version 0.99a - First Release: August 2, 2018
+// Version 0.99c - October 2018
 //
 // http://www.thecrowbox.com
 //==========================================================
@@ -159,7 +159,7 @@ void CCrowboxCore::Setup()
     DebugPrint( "  Servo initialization and lid parking...\n" );
     
     // Attach the servo device to the pin which controls the servo position
-    m_basketServo.attach( OUTPUT_PIN_SERVO );
+    AttachBasketServo();
     
     // Do this little dance to put the servo into a known good state and position
     m_basketServo.write( SERVO_POS_MIDPOINT );
@@ -376,6 +376,39 @@ void CCrowboxCore::RemoveEnqueuedCoin()
 }
 
 //----------------------------------------------------------
+// Helper function to attach the basket servo
+//
+// NOTE: This function is safe to call even if the servo is
+// already attached. If the servo is attached, this function
+// will do nothing.
+//----------------------------------------------------------
+void CCrowboxCore::AttachBasketServo()
+{
+  if( !m_basketServo.attached() )
+  {
+    m_basketServo.attach( OUTPUT_PIN_SERVO );
+  }
+}
+
+//----------------------------------------------------------
+// Helper function to detach the basket servo. This is done
+// so that the servo can be detached at the end of any 
+// operation to open or close the sliding lid, to address
+// the issue of buzzing/clicking/chattering servos
+//
+// NOTE: This function is safe to call even if the servo is
+// already detached. If the servo is not attached, this 
+// function will do nothing.
+//----------------------------------------------------------
+void CCrowboxCore::DetachBasketServo()
+{
+  if( m_basketServo.attached() )
+  {
+    m_basketServo.detach();
+  }
+}
+
+//----------------------------------------------------------
 // This is a BLOCKING operation. When you call this function 
 // it doesn't return until the lid over the reward basket
 // is fully open.
@@ -388,11 +421,16 @@ void CCrowboxCore::OpenRewardBasket()
     // already in the wished state.
     if( !IsRewardBasketOpen() )
     {
+        // Make sure the servo is attached to the signal pin. The last operation
+        // involving the servo may have detached it.
+        AttachBasketServo();
+        
         // For now we just whip the door open!
         m_basketServo.write( SERVO_POS_OPEN );
         
-        // Give it time to finish. Half-second works fine.
-        delay( 500 );  
+        // Give it time to finish. One second is more than enough
+        delay( 1000 ); 
+        DetachBasketServo(); 
     }
     
     // Now we know the basket is open.
@@ -420,6 +458,9 @@ void CCrowboxCore::CloseRewardBasket()
   
   if( IsRewardBasketOpen() )
   {
+    // Ensure the basket servo is attached
+    AttachBasketServo();
+    
     // We can't know the true position of the servo when this
     // method is called so we start by sending the servo to 
     // "full open" position and then delay() long enough for
@@ -441,7 +482,7 @@ void CCrowboxCore::CloseRewardBasket()
     // sure of what you're doing!
     int servoStepSize = servoPosition / BASKET_CLOSE_NUM_STEPS;
   
-    while( servoPosition >= SERVO_POS_CLOSED )
+    while( servoPosition > SERVO_POS_CLOSED )
     {
       servoPosition -= servoStepSize;
       m_basketServo.write( servoPosition );
@@ -450,13 +491,18 @@ void CCrowboxCore::CloseRewardBasket()
     }   
   }
 
-  // Backing off a bit from zero for a final position seems
-  // to address servo clicking with some of the MG995 servos
-  // we have tested. See the value of SERVO_POS_CLOSED in 
-  // cros_constants.h
+  // Stuff the final closed position
   m_basketServo.write( SERVO_POS_CLOSED );
   delay( 400 );
   m_basketState = BASKET_STATE_CLOSED;
+  
+  // Any time the sliding basket lid reaches the 'fully open' or 'fully closed'
+  // state, we detach the servo from the signal pin. This is an attempt to remedy 
+  // situations where some CrowBox users have observed their servos to continue 
+  // clicking or whining after the servo has finished moving. Detaching the servo
+  // will eliminate the signal that the Arduino is constantly sending to the servo.
+  DetachBasketServo();
+  
   DebugPrint( "Reward basket closed and locked\n" );
 }
 

@@ -3,7 +3,7 @@
 //
 // Fixed values used throughout
 //
-// Version 0.99a - First Release: August 2, 2018
+// Version 0.99c - October 2018
 //
 // http://www.thecrowbox.com
 //==========================================================
@@ -15,8 +15,6 @@
 #define CROS_CONSTANTS_H
 
 #include "cros_core.h"
-
-#define CROS_VERSION_STRING "CrOS v0.99a"
 
 //======================================
 // Constants used by the code that stores
@@ -113,7 +111,7 @@
 // Constants for servo behavior
 //======================================
 #define SERVO_POS_OPEN        180
-#define SERVO_POS_CLOSED      5     // @@@BUG - When this is set to zero, my servos chatter and can't park
+#define SERVO_POS_CLOSED      0     
 #define SERVO_POS_MIDPOINT    90
 
 //======================================
