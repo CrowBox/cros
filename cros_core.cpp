@@ -412,7 +412,6 @@ void CCrowboxCore::AttachBasketServo()
   if( !m_basketServo.attached() )
   {
     m_basketServo.attach( OUTPUT_PIN_SERVO );
-    BlinkLED( 1 );    
   }
 }
 
@@ -431,7 +430,6 @@ void CCrowboxCore::DetachBasketServo()
   if( m_basketServo.attached() )
   {
     m_basketServo.detach();
-    BlinkLED( 2 );
   }
 }
 
